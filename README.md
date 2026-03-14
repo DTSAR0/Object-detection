@@ -4,11 +4,13 @@ Red object detection and tracking from video using OpenCV. Detects a single red 
 
 ## Features
 
-- **Red color detection** – HSV-based masking with two hue ranges (0–10 and 170–179) to cover red
-- **Morphological processing** – Opening + closing to reduce noise and fill small gaps in the mask
-- **Object tracking** – Center and area computed from mask moments (assumes a single circular object)
-- **Visualization** – Original frame with circle around the object, center line, and offset bars
-- **CLI** – Optional video path and minimum area via command-line arguments
+- **Red color detection** – HSV-based masking with four hue ranges to cover various red tones (incl. 0–5, 170–180)
+- **Morphological processing** – Opening + closing (5×5 kernel) to reduce noise and fill small gaps
+- **Object tracking** – Center and area computed from mask moments (assumes single circular object)
+- **Visualization** – Original frame with circle, center line, offset bars, and offset value in px
+- **Video playback controls** – Pause, rewind, forward, jump to start/end
+- **CLI** – Optional video path and minimum area via `--video` and `--min-area`
+- **HSV picker tool** – Tune mask thresholds by hovering over video to see HSV values and IN MASK / OUT status
 
 ## Requirements
 
@@ -24,6 +26,8 @@ pip install -r requirements.txt
 
 ## Usage
 
+### Object detection (main script)
+
 ```bash
 # Run with default video (F1.MOV)
 python object_detection.py
@@ -38,16 +42,44 @@ python object_detection.py --min-area 500
 python object_detection.py --help
 ```
 
-**Controls:** Press `q` or `ESC` to exit.
+### HSV picker (calibration tool)
+
+```bash
+# Run HSV picker with default video
+python hsv_picker.py
+
+# Specify video
+python hsv_picker.py --video path/to/video.mp4
+```
+
+Displays the red mask. Hover the cursor to see H, S, V values and whether the pixel is **IN MASK** (red) or **OUT**.
+
+## Controls (both scripts)
+
+| Key | Action |
+|-----|--------|
+| **Space** | Pause / resume |
+| **A** | Rewind 2 seconds |
+| **D** | Forward 2 seconds |
+| **S** or **0** | Jump to start |
+| **E** | Jump to end |
+| **Q** or **ESC** | Quit |
 
 ## How It Works
 
-1. **HSV masking** – Converts each frame to HSV and creates a binary mask for red (two ranges, since red wraps around H=0).
-2. **Morphology** – Applies opening (removes small noise) then closing (fills small holes).
-3. **Moments** – Uses `cv2.moments()` to get object center (cx, cy), area, and radius (assuming circular shape).
-4. **Visualization** – Draws a circle around the object, a vertical center line, and horizontal bars showing left/right offset from the frame center.
+1. **HSV masking** – Converts each frame to HSV and creates a binary mask for red (four ranges for better coverage).
+2. **Morphology** – Opening (removes small noise) then closing (fills small holes).
+3. **Moments** – Uses `cv2.moments()` to get object center (cx, cy), area, and radius (circular assumption).
+4. **Visualization** – Circle around object, vertical center line, horizontal offset bars, numeric offset (px left/right from center).
 
 ## Output
 
-- **Window 1:** Original frame with tracking overlay (circle, center line, offset bars)
-- **Window 2:** Processed binary mask (HSV + morphology)
+### object_detection.py
+
+- **Window 1:** Original frame with tracking overlay (circle, center line, offset bars, offset text)
+- **Window 2:** Processed HSV preview
+- **Window 3:** Binary mask (HSV + morphology)
+
+### hsv_picker.py
+
+- **Single window:** Red mask video with H/S/V and IN MASK / OUT overlay when hovering

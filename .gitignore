@@ -210,4 +210,8 @@ __marimo__
 *.MOV
 *.mov
 *.MP4
-*.mp4/
+*.mp4
+
+# Project-specific
+.vscode/
+Screenshot*.png
